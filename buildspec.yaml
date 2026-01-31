@@ -18,7 +18,7 @@ phases:
       - echo "Build started on $(date)"
       - echo "Building Docker image with build args..."
 
-      - docker build --build-arg VITE_APP_API_ENDPOINT_URL=$VITE_APP_API_ENDPOINT_URL --build-arg VITE_APP_TMDB_V3_API_KEY=$VITE_APP_TMDB_V3_API_KEY -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker build --build-arg VITE_APP_API_ENDPOINT_URL=${VITE_APP_API_ENDPOINT_URL} --build-arg VITE_APP_TMDB_V3_API_KEY=${VITE_APP_TMDB_V3_API_KEY} -t $REPOSITORY_URI:$IMAGE_TAG .
 
   post_build:
     commands:
