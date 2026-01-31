@@ -1,17 +1,34 @@
-FROM node:18-alpine as builder
+# ---- Build Stage ----
+FROM node:18-alpine AS build
 WORKDIR /app
-COPY ./package.json .
-COPY ./yarn.lock .
-RUN yarn install
-COPY . .
-ARG TMDB_V3_API_KEY
-ENV VITE_APP_TMDB_V3_API_KEY=${TMDB_V3_API_KEY}
-ENV VITE_APP_API_ENDPOINT_URL="https://api.themoviedb.org/3"
-RUN yarn build
 
-FROM nginx:stable-alpine
-WORKDIR /usr/share/nginx/html
-RUN rm -rf ./*
-COPY --from=builder /app/dist .
+# Install dependencies
+COPY package.json package-lock.json* ./
+RUN npm ci --silent
+
+# Copy all source files
+COPY . .
+
+# Inject build-time environment variables into public/env-config.js
+# You can add more ARGs as needed for other runtime config
+ARG VITE_APP_API_ENDPOINT_URL
+ARG VITE_APP_TMDB_V3_API_KEY
+
+# Build the app (Vite will copy public/ to dist/)
+RUN npm run build
+
+# ---- Production Stage ----
+FROM nginx:alpine
+
+# Remove default nginx static content
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy built static files
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expose port 80
 EXPOSE 80
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
