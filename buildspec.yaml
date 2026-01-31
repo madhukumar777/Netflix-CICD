@@ -1,35 +1,41 @@
 version: 0.2
 
-env:
-  parameter-store:
-    KEY: /netflix/key
-
 phases:
-  install:
-    runtime-versions:
-      nodejs: latest
-    commands:
-      - node --version
-      - echo "installed node"
   pre_build:
     commands:
       - echo "Logging in to Amazon ECR..."
       - aws --version
-      - $(aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 637423384780.dkr.ecr.YOUR_REGION.amazonaws.com)
-      - npm install
-      - echo "Dependencies installed"
+      - docker --version
+
+      - ECR_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+      - REPOSITORY_URI=${ECR_URI}/${ECR_REPO_NAME}
+
+      - aws ecr get-login-password --region $AWS_REGION |
+        docker login --username AWS --password-stdin $ECR_URI
+
   build:
     commands:
-      - echo "Building the Docker image..."
-      - docker build . -t 637423384780.dkr.ecr.us-east-1.amazonaws.com/netflix:latest --build-arg TMDB_V3_API_KEY=$KEY
+      - echo "Build started on $(date)"
+      - echo "Building Docker image..."
+
+      - docker build -t $ECR_REPO_NAME .
+
+      - docker tag $ECR_REPO_NAME:$IMAGE_TAG \
+        $REPOSITORY_URI:$IMAGE_TAG
+
   post_build:
     commands:
-      - echo "Pushing the Docker image..."
-      - docker push 637423384780.dkr.ecr.us-east-1.amazonaws.com/netflix:latest
-      - echo "Docker image pushed."
+      - echo "Build completed on $(date)"
+      - echo "Pushing Docker image to ECR..."
+
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+
+      - echo "Creating imagedefinitions.json for ECS..."
+
+      - printf '[{"name":"%s","imageUri":"%s"}]' \
+        $ECR_REPO_NAME \
+        $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+
 artifacts:
   files:
-    - '**/*'
-  base-directory: './'
-  name: build-artifact-name
-  discard-paths: no
+    - imagedefinitions.json
