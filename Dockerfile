@@ -18,7 +18,7 @@ ARG VITE_APP_TMDB_V3_API_KEY
 RUN npm run build
 
 # ---- Production Stage ----
-FROM nginx:alpine
+FROM 833899002288.dkr.ecr.ap-south-2.amazonaws.com/node:latest
 
 # Remove default nginx static content
 RUN rm -rf /usr/share/nginx/html/*
