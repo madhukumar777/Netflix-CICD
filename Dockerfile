@@ -1,5 +1,5 @@
 # ---- Build Stage ----
-FROM node:18-alpine AS build
+FROM 833899002288.dkr.ecr.ap-south-2.amazonaws.com/node:18-alpine AS build
 WORKDIR /app
 
 # Install dependencies
