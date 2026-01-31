@@ -1,13 +1,15 @@
 # ---- Build Stage ----
 FROM 833899002288.dkr.ecr.ap-south-2.amazonaws.com/node:18-alpine AS build
+# Set working directory
 WORKDIR /app
-COPY . .
+
 # Install dependencies
-COPY package.json ./
-RUN npm install
+COPY ./package.json .
+COPY ./yarn.lock .
+RUN yarn install
 
 # Copy all source files
-
+copy . .
 
 # Inject build-time environment variables into public/env-config.js
 # You can add more ARGs as needed for other runtime config
@@ -18,7 +20,7 @@ ENV VITE_APP_TMDB_V3_API_KEY=$VITE_APP_TMDB_V3_API_KEY
 
 
 # Build the app (Vite will copy public/ to dist/)
-RUN npm run build
+RUN yarn build
 
 # ---- Production Stage ----
 FROM 833899002288.dkr.ecr.ap-south-2.amazonaws.com/node:latest
