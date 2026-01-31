@@ -1,14 +1,13 @@
 # ---- Build Stage ----
 FROM 833899002288.dkr.ecr.ap-south-2.amazonaws.com/node:18-alpine AS build
 WORKDIR /app
-
+COPY . .
 # Install dependencies
 COPY package.json ./
-COPY yarn.lock ./
-RUN npm ci --silent
+RUN npm install
 
 # Copy all source files
-COPY . .
+
 
 # Inject build-time environment variables into public/env-config.js
 # You can add more ARGs as needed for other runtime config
