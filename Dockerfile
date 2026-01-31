@@ -3,7 +3,7 @@ FROM 833899002288.dkr.ecr.ap-south-2.amazonaws.com/node:18-alpine AS build
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json* ./
+COPY package.json ./
 RUN npm ci --silent
 
 # Copy all source files
