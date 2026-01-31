@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package.json ./
+COPY yarn.lock ./
 RUN npm ci --silent
 
 # Copy all source files
@@ -13,6 +14,9 @@ COPY . .
 # You can add more ARGs as needed for other runtime config
 ARG VITE_APP_API_ENDPOINT_URL
 ARG VITE_APP_TMDB_V3_API_KEY
+ENV VITE_APP_API_ENDPOINT_URL=$VITE_APP_API_ENDPOINT_URL
+ENV VITE_APP_TMDB_V3_API_KEY=$VITE_APP_TMDB_V3_API_KEY
+
 
 # Build the app (Vite will copy public/ to dist/)
 RUN npm run build
