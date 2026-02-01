@@ -7,13 +7,8 @@ phases:
       - aws --version
       - docker --version
 
-      # Compose ECR URI from pipeline variables
       - ECR_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
       - REPOSITORY_URI=${ECR_URI}/${ECR_REPO_NAME}
-
-      # 🚨 DO NOT use CODEBUILD_BUILD_ID (contains :)
-      # IMAGE_TAG MUST be pipeline-safe (number / latest / v1)
-      - echo "Using IMAGE_TAG=$IMAGE_TAG"
 
       - aws ecr get-login-password --region $AWS_REGION |
         docker login --username AWS --password-stdin $ECR_URI
@@ -21,7 +16,8 @@ phases:
   build:
     commands:
       - echo "Build started on $(date)"
-      - echo "Building Docker image..."
+      - echo "Building Docker image with build args..."
+
       - docker build \
           --build-arg VITE_APP_API_ENDPOINT_URL=${VITE_APP_API_ENDPOINT_URL} \
           --build-arg VITE_APP_TMDB_V3_API_KEY=${VITE_APP_TMDB_V3_API_KEY} \
@@ -29,7 +25,9 @@ phases:
 
   post_build:
     commands:
+      - echo "Build completed on $(date)"
       - echo "Pushing Docker image to ECR..."
+
       - docker push $REPOSITORY_URI:$IMAGE_TAG
 
       - echo "Creating imagedefinitions.json for ECS..."
