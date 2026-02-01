@@ -16,25 +16,15 @@ phases:
   build:
     commands:
       - echo "Build started on $(date)"
-      - echo "Building Docker image with build args..."
-
-      - docker build \
-          --build-arg VITE_APP_API_ENDPOINT_URL=${VITE_APP_API_ENDPOINT_URL} \
-          --build-arg VITE_APP_TMDB_V3_API_KEY=${VITE_APP_TMDB_V3_API_KEY} \
-          -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker build --build-arg VITE_APP_API_ENDPOINT_URL=${VITE_APP_API_ENDPOINT_URL} --build-arg VITE_APP_TMDB_V3_API_KEY=${VITE_APP_TMDB_V3_API_KEY} -t $REPOSITORY_URI:$IMAGE_TAG .
 
   post_build:
     commands:
-      - echo "Build completed on $(date)"
       - echo "Pushing Docker image to ECR..."
-
       - docker push $REPOSITORY_URI:$IMAGE_TAG
 
-      - echo "Creating imagedefinitions.json for ECS..."
-      - printf '[{"name":"%s","imageUri":"%s"}]' \
-        "$CONTAINER_NAME" \
-        "$REPOSITORY_URI:$IMAGE_TAG" > imagedefinitions.json
-
+      - echo "Creating imagedefinitions.json..."
+      - printf '[{"name":"%s","imageUri":"%s"}]' "$CONTAINER_NAME" "$REPOSITORY_URI:$IMAGE_TAG" > imagedefinitions.json
       - cat imagedefinitions.json
 
 artifacts:
