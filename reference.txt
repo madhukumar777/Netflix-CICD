@@ -1,0 +1,5 @@
+| Component       | Controls               | Scope      |
+| --------------- | ---------------------- | ---------- |
+| Service Account | Pod identity           | Kubernetes |
+| RBAC            | Permissions in cluster | Kubernetes |
+| IRSA            | Permissions in AWS     | AWS        |
